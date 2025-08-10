@@ -1,3 +1,9 @@
+users:
+  - default
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDpqXtTU0E3j9QCzwFKLABIK+z+9+5SnooQ2Au8ObI0p8z0N/ANTKXbb2wVhg2TnwsZs11fXqLnsrF9fRLYJB2CkCyiuWzi/18dIjyFEAqbXImywbI03gqGfL3MBjb0V8hW2V5Wh4wPJJhNJUGkwqrjZMw8vmIDhpsZ35OPcabxGLZXT5PXCSAQPWx1tFeeYUHSIApanKwzOm56wxSssvLP0mHa5fOSZmT3QNs729KReZNxnVU3hoSgw4r725HXunpvfstUcnDaAnKa5ukr1j39zWSnXgeEoPUpg2Qvn2cZiZSdHxeWLySZ28K4LzPJCxFnOT//lnVmmPQGva/pMxdptRc9XymRJDWMqGNzl9dEHxlYfHpEEQc8eR+h5BGEaQpnkXmAk2mNcOjSPDCUyqWF8KBp0w30AoWgOOaJXpuFCRwbqvWlgUEU1CA26QsFPhPtjphQ/TciQWqYN7DOypd2MXtZc5l8Qtn9uTbFNr6jplEctriR0Aw/GEyJ9514sgs4pcbrEJWP1/knoGoTFkWnlysUwmLh7Lol4f1MXAiX136pKZlYY3Od2ZVLvWlGtSmhzEGBXqmmF/tc7R8hE60/HwNlCO/+wvKpPOISqWDpRoYmWWZoQYLeqjYTfMYf+CZAywgfz+PWEoDlx6Utppov9Cq7gXz64g9TEVdrNUtzPQ== emre@ozudogru.com
 apt:
   sources:
     docker:
@@ -76,12 +82,27 @@ packages:
 - jq
 - qemu-user-static
 - skopeo
+- htop
+- nload
+- ncdu
+- iotop
+- nano
+- tmux
+- bind-utils
+- traceroute
+- python3-pip
+- htop
 
 snap:
   commands:
   - snap install yq
-
 runcmd:
+# Disable UFW
+- ufw disable
+# Disable AppArmor
+- systemctl stop apparmor
+- systemctl disable apparmor
+- aa-teardown
 - |
   # add `ubuntu` to the `docker` group
   adduser ubuntu docker
@@ -102,16 +123,6 @@ runcmd:
   systemctl disable bluetooth.target --now
   systemctl disable ua-messaging.service ua-messaging.timer --now
 
-- |
-  # portainer, to easily manage containers
-  # available on http://<IP>:9000
-  docker run -d \
-    -p 9000:9000 \
-    --name=portainer \
-    --restart=always \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v portainer_data:/data \
-    portainer/portainer-ce
 
 - |
   # apt cleanup
